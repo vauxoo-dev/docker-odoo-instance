@@ -26,4 +26,4 @@ RUN mkdir -p /var/log/supervisor
 VOLUME ["/var/log/supervisor", "/home/odoo/instance/odoo/openerp/filestore"]
 
 EXPOSE 8069
-CMD ["/entry_point.py"]
+ENTRYPOINT ["/entry_point.py"]
