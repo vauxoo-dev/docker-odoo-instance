@@ -23,7 +23,9 @@ ADD files/supervisord.conf /external_files/supervisord.conf
 ADD files/entry_point.py /entry_point.py
 RUN chmod +x /entry_point.py
 RUN mkdir -p /var/log/supervisor
-VOLUME ["/var/log/supervisor", "/home/odoo/instance/odoo/openerp/filestore"]
+VOLUME ["/var/log/supervisor", \
+        "/home/odoo/instance/odoo/openerp/filestore", \
+        "/home/odoo/instance/odoo/config"]
 
 EXPOSE 8069
 ENTRYPOINT ["/entry_point.py"]
