@@ -1,40 +1,66 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
+'''
+Entry point for Dockerized aplications, this works mainly with
+Odoo instances that will be launched using supervisor
+'''
 from os import stat, path, getenv
 from subprocess import call
 from shutil import copy2
 import pwd
 import fileinput
 
-filestore_path = '/home/odoo/instance/odoo/openerp/filestore'
-configfile_path = '/home/odoo/instance/config/odoo.conf'
+FILESTORE_PATH = '/home/odoo/instance/odoo/openerp/filestore'
+CONFIGFILE_PATH = '/home/odoo/instance/config/odoo.conf'
 
-st = stat(filestore_path)
-owner = pwd.getpwuid(st.st_uid).pw_name
-if owner != "odoo":
-    call(["chown", "-R", "odoo", filestore_path])
 
-if not path.isfile(configfile_path):
-    copy2("/external_files/odoo.conf", configfile_path)
+def change_value(file_name, search_str, new_str):
+    '''
+    Changes value from a config file
 
-if getenv('DB_SERVER'):
-    for line in fileinput.input(configfile_path, inplace=True):
-        if line.startswith('db_host'):
-            print('db_host = %s' % getenv('DB_SERVER'))
+    :param str file_name: Config file name
+    :param str search_str: Search sting
+    :param str new_str: New string that
+    '''
+    for line in fileinput.input(file_name, inplace=True):
+        if line.startswith(search_str, 'db_host'):
+            print(new_str)
         else:
             print(line.replace('\n', ''))
 
-if getenv('DB_PORT'):
-    for line in fileinput.input(configfile_path, inplace=True):
-        if line.startswith('db_port'):
-            print('db_port = %s' % getenv('DB_PORT'))
-        else:
-            print(line.replace('\n', ''))
 
-st = stat(configfile_path)
-owner = pwd.getpwuid(st.st_uid).pw_name
-if owner != "odoo":
-    call(["chown", "-R", "odoo", configfile_path])
+def get_owner(file_name):
+    '''
+    This function gets owner name from system for a directory or file
 
-call(["/usr/bin/supervisord"])
+    :param str file_name: File or directory name
+    :returns: Owner name
+    '''
+    file_stat = stat(file_name)
+    return pwd.getpwuid(file_stat.st_uid).pw_name
+
+
+def main():
+    '''
+    Main entry point function
+    '''
+
+    if not path.isfile(CONFIGFILE_PATH):
+        copy2("/external_files/odoo.conf", CONFIGFILE_PATH)
+
+    if getenv('DB_SERVER'):
+        change_value(CONFIGFILE_PATH, 'db_host', 'db_host = %s' % getenv('DB_SERVER'))
+
+    if getenv('DB_PORT'):
+        change_value(CONFIGFILE_PATH, 'db_port', 'db_port = %s' % getenv('DB_PORT'))
+
+    if get_owner(CONFIGFILE_PATH) != "odoo":
+        call(["chown", "-R", "odoo", CONFIGFILE_PATH])
+
+    if get_owner(FILESTORE_PATH) != "odoo":
+        call(["chown", "-R", "odoo", FILESTORE_PATH])
+
+    call(["/usr/bin/supervisord"])
+
+if __name__ == '__main__':
+    main()
