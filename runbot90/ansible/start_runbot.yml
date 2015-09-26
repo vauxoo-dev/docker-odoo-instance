@@ -21,6 +21,6 @@
         publish_all_ports: yes
         volumes:
           - "{{ working_folder }}/static:/home/runbot/instance/extra_addons/odoo-extra/runbot/static"
-          - "{{ working_folder }}/tmp:/tmp"
+          - "{{ working_folder }}/logs:/var/log/supervisor"
         links:
           - "{{ runbot_db }}:dbrunbot"

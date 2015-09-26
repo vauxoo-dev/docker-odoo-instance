@@ -2,5 +2,10 @@
 
 set -e
 
-source ${HOME}/.db_source
-${HOME}/instance/odoo/odoo.py -c ${HOME}/instance/config/odoo_runbot.conf $1
+chown -R runbot:runbot ${EXTRA_ADDONS}/odoo-extra/runbot/static
+chown -R runbot:runbot /home/runbot/.local/share/Odoo/filestore
+chown -R runbot:runbot /var/log/supervisor
+find /home/runbot/instance/extra_addons/odoo-extra/runbot -name res_config_view.xml -exec sed -i 's/base.menu_config/base.menu_administration/g' {} \;
+source /home/runbot/.db_source
+
+/usr/bin/supervisord

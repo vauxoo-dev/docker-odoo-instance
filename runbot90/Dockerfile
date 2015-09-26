@@ -10,14 +10,15 @@ RUN echo 'root:runbot' |chpasswd
 RUN mkdir -p /home/runbot/instance/config \
     && mkdir -p /home/runbot/instance/extra_addons \
     && mkdir -p /home/runbot/.ssh \
-    && mkdir -p /home/runbot/.local/share/Odoo/filestore
+    && mkdir -p /home/runbot/.local/share/Odoo/filestore \
+    && mkdir -p /var/log/supervisor
 ADD files/id_rsa /home/runbot/.ssh/id_rsa
 ADD files/odoo_runbot.conf /home/runbot/instance/config/odoo_runbot.conf
 ADD files/entrypoint.sh /entrypoint.sh
 ADD files/db_source /home/runbot/.db_source
+ADD files/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN chown runbot:runbot -R /home/runbot \
-    && chown runbot:runbot /entrypoint.sh \
-    && chown runbot:runbot -R /tmp
+    && chown runbot:runbot /entrypoint.sh
 RUN ln -s /usr/sbin/nginx /usr/bin/nginx
 
 # Extra depends
@@ -51,8 +52,11 @@ RUN git clone -b 9.0 git@github.com:odoo/odoo.git ${HOME}/instance/odoo \
     && git clone -b 8.0 git@github.com:Vauxoo/odoo-themes.git ${EXTRA_ADDONS}/odoo-themes \
     && git clone -b 8.0 git@github.com:Vauxoo/server-tools.git ${EXTRA_ADDONS}/server-tools
 
+# Finish with root
+USER root
+
 # Docker configuration
-VOLUME ["/home/runbot/.local/share/Odoo/filestore", "/home/runbot/instance/extra_addons/odoo-extra/runbot/static"]
+VOLUME ["/home/runbot/.local/share/Odoo/filestore", "/home/runbot/instance/extra_addons/odoo-extra/runbot/static", "/var/log/supervisor"]
 
 EXPOSE 8069
 EXPOSE 8072
