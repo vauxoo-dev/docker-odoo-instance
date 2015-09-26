@@ -1,4 +1,4 @@
-runbot_image_name: runbot-90
+runbot_image_name: runbot:90
 runbot_container_name: runbot_90
 runbot_hostname: runbot.vauxoo.com
 

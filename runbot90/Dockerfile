@@ -16,7 +16,8 @@ ADD files/odoo_runbot.conf /home/runbot/instance/config/odoo_runbot.conf
 ADD files/entrypoint.sh /entrypoint.sh
 ADD files/db_source /home/runbot/.db_source
 RUN chown runbot:runbot -R /home/runbot \
-    && chown runbot:runbot /entrypoint.sh
+    && chown runbot:runbot /entrypoint.sh \
+    && chown runbot:runbot -R /tmp
 RUN ln -s /usr/sbin/nginx /usr/bin/nginx
 
 # Extra depends
