@@ -1,0 +1,7 @@
+runbot_image_name: runbot-90
+runbot_name: runbot_90
+runbot_hostname: runbot.vauxoo.com
+home_dir: "{{ lookup('env','HOME') }}"
+
+working_folder: "{{home_dir}}/runbot/data_folder"
+runbot_db: dbrunbot

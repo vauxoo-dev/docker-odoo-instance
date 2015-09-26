@@ -5,17 +5,21 @@
 FROM vauxoo/odoo-80-image
 MAINTAINER Moises Lopez <moylop260@vauxoo.com>
 RUN adduser --home=/home/runbot --disabled-password --gecos "" --shell=/bin/bash runbot
-
 RUN echo 'root:runbot' |chpasswd
-RUN mkdir /home/runbot/.ssh
+
+RUN mkdir -p /home/runbot/instance/config \
+    && mkdir -p /home/runbot/instance/extra_addons \
+    && mkdir -p /home/runbot/.ssh \
+    && mkdir -p /home/runbot/.local/share/Odoo/filestore
 ADD files/id_rsa /home/runbot/.ssh/id_rsa
-ADD files/odoo_runbot.conf /home/runbot/.openerp_serverrc
+ADD files/odoo_runbot.conf /home/runbot/instance/config/odoo_runbot.conf
 ADD files/entrypoint.sh /entrypoint.sh
-RUN mkdir -p /home/runbot/.local/share/Odoo/filestore
+ADD files/db_source /home/runbot/.db_source
 RUN chown runbot:runbot -R /home/runbot \
     && chown runbot:runbot /entrypoint.sh
 RUN ln -s /usr/sbin/nginx /usr/bin/nginx
 
+# Extra depends
 RUN pip install --upgrade git+https://github.com/Vauxoo/panama-dv.git
 
 # Install ngrok to run fowardporting in developer environment
@@ -24,23 +28,33 @@ RUN  curl https://dl.ngrok.com/ngrok_2.0.19_linux_amd64.zip -o /tmp/ngrok.zip \
     && rm -rf /tmp/ngrok.zip
 
 USER runbot
+
+RUN echo "source /home/runbot/.db_source" >> /home/runbot/.profile
+
+ENV EXTRA_ADDONS /home/runbot/instance/extra_addons
+
+# Add to known hosts git server
 RUN ssh-keyscan github.com > ${HOME}/.ssh/known_hosts \
     && ssh-keyscan launchpad.net >> ${HOME}/.ssh/known_hosts \
     && ssh-keyscan bitbucket.org >> ${HOME}/.ssh/known_hosts \
     && ssh-keyscan gitlab.com >> ${HOME}/.ssh/known_hosts
-RUN git config --global user.email "runbot@vauxoo.com"
-RUN git config --global user.name "Runbot Vauxoo"
-RUN /bin/bash -c "mkdir -p /home/runbot/instance/{config,extra_addons}"
-RUN git clone -b 8.0 git@github.com:odoo/odoo.git ${HOME}/instance/odoo \
-    && git clone -b 8.0-vauxoo git@github.com:Vauxoo/runbot-addons.git ${HOME}/instance/extra_addons/runbot-addons \
-    && git clone -b 8.0-vauxoo git@github.com:Vauxoo/odoo-extra.git ${HOME}/instance/extra_addons/odoo-extra \
-    && git clone -b 8.0 --single-branch --depth=1 git@github.com:Vauxoo/odoo-themes.git ${HOME}/instance/extra_addons/odoo-themes \
-    && git clone -b 8.0 --single-branch --depth=1 git@github.com:Vauxoo/server-tools.git ${HOME}/instance/extra_addons/server-tools
 
+# Add config basic user to work with git
+RUN git config --global user.email "runbot@vauxoo.com" && \
+    git config --global user.name "Runbot Vauxoo"
+
+# Clone all repo depends
+RUN git clone -b 9.0 git@github.com:odoo/odoo.git ${HOME}/instance/odoo \
+    && git clone -b 8.0 git@github.com:OCA/runbot-addons.git ${EXTRA_ADDONS}/runbot-addons \
+    && git clone -b master git@github.com:odoo/odoo-extra.git ${EXTRA_ADDONS}/odoo-extra \
+    && git clone -b 8.0 git@github.com:Vauxoo/odoo-themes.git ${EXTRA_ADDONS}/odoo-themes \
+    && git clone -b 8.0 git@github.com:Vauxoo/server-tools.git ${EXTRA_ADDONS}/server-tools
+
+# Docker configuration
 VOLUME ["/home/runbot/.local/share/Odoo/filestore", "/home/runbot/instance/extra_addons/odoo-extra/runbot/static"]
 
 EXPOSE 8069
 EXPOSE 8072
 EXPOSE 8080
 
-# CMD /entry_point.py
+CMD /entrypoint.sh

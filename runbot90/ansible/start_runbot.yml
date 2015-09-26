@@ -1,0 +1,26 @@
+- hosts: local
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Start a new postgres container
+      docker:
+        image: postgres:9.3
+        name: "{{ runbot_db }}"
+        env: "POSTGRES_USER=runbot,POSTGRES_PASSWORD=runbot"
+        publish_all_ports: yes
+        volumes:
+          - "{{ working_folder }}/psql_data:/var/lib/postgresql/data"
+    - name: Start a new runbot container
+      docker:
+        image: "{{ runbot_image_name }}"
+        name: "{{ runbot_name }}"
+        command: "/entrypoint.sh"
+        hostname: "{{ runbot_hostname }}"
+        publish_all_ports: yes
+        volumes:
+          - "{{ working_folder }}/ssh:/home/runbot/.ssh"
+          - "{{ working_folder }}/static:/home/runbot/instance/extra_addons/odoo-extra/runbot/static"
+          - "{{ working_folder }}/tmp:/tmp"
+        links:
+          - "{{ runbot_db }}:dbrunbot"

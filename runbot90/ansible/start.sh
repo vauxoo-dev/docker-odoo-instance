@@ -1,0 +1,1 @@
+ansible-playbook start_runbot.yml -c local -i inventory
