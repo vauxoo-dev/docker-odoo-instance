@@ -23,7 +23,12 @@ RUN chown runbot:runbot -R /home/runbot \
 RUN ln -s /usr/sbin/nginx /usr/bin/nginx
 
 # Extra depends
-RUN pip install --upgrade git+https://github.com/Vauxoo/panama-dv.git
+RUN pip install --upgrade git+https://github.com/Vauxoo/panama-dv.git \
+    && pip install --upgrade git+https://github.com/vauxoo/travis2docker.git \
+    && pip install --upgrade pyopenssl ndg-httpsclient pyasn1
+
+# Install docker in docker
+RUN curl -sSL https://get.docker.com/ | sh
 
 # Install ngrok to run fowardporting in developer environment
 RUN  curl https://dl.ngrok.com/ngrok_2.0.19_linux_amd64.zip -o /tmp/ngrok.zip \

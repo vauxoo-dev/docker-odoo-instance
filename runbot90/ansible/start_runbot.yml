@@ -19,6 +19,7 @@
         command: "/entrypoint.sh"
         hostname: "{{ runbot_hostname }}"
         publish_all_ports: yes
+        privileged: yes
         volumes:
           - "{{ working_folder }}/static:/home/runbot/instance/extra_addons/odoo-extra/runbot/static"
           - "{{ working_folder }}/logs:/var/log/supervisor"
