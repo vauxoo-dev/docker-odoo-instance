@@ -23,5 +23,6 @@
         volumes:
           - "{{ working_folder }}/static:/home/runbot/instance/extra_addons/odoo-extra/runbot/static"
           - "{{ working_folder }}/logs:/var/log/supervisor"
+          - "{{ working_folder }}/docker:/var/lib/docker"
         links:
           - "{{ runbot_db }}:dbrunbot"

@@ -22,7 +22,7 @@ RUN chown runbot:runbot -R /home/runbot \
     && chown runbot:runbot /entrypoint.sh
 RUN ln -s /usr/sbin/nginx /usr/bin/nginx
 
-# Extra depends
+# Extra depends: panama-dv for modules vauxoo, t2d for runbot, pyopenssl for security warning
 RUN pip install --upgrade git+https://github.com/Vauxoo/panama-dv.git \
     && pip install --upgrade git+https://github.com/vauxoo/travis2docker.git \
     && pip install --upgrade pyopenssl ndg-httpsclient pyasn1
@@ -66,10 +66,15 @@ RUN git apply /home/runbot/instance/patches/* \
 
 # Finish with root
 USER root
+RUN usermod -aG docker runbot
 
 # Docker configuration
-VOLUME ["/home/runbot/.local/share/Odoo/filestore", "/home/runbot/instance/extra_addons/odoo-extra/runbot/static", "/var/log/supervisor"]
+VOLUME ["/home/runbot/.local/share/Odoo/filestore", "/home/runbot/instance/extra_addons/odoo-extra/runbot/static", "/var/log/supervisor", "/var/lib/docker"]
 
+# Docker port
+EXPOSE 2376
+
+# Odoo instance
 EXPOSE 8069
 EXPOSE 8072
 EXPOSE 8080
