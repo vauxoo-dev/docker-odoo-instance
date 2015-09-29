@@ -20,7 +20,9 @@ ADD files/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD files/patches /home/runbot/instance/patches
 RUN chown runbot:runbot -R /home/runbot \
     && chown runbot:runbot /entrypoint.sh
-RUN ln -s /usr/sbin/nginx /usr/bin/nginx
+
+RUN apt-get update && apt-get install nginx \
+    && ln -s /usr/sbin/nginx /usr/bin/nginx
 
 # Extra depends: panama-dv for modules vauxoo, t2d for runbot, pyopenssl for security warning
 RUN pip install --upgrade git+https://github.com/Vauxoo/panama-dv.git \
@@ -70,6 +72,9 @@ RUN git apply /home/runbot/instance/patches/* \
 # Finish with root
 USER root
 RUN usermod -aG docker runbot
+
+# Dev tool
+RUN curl http://j.mp/spf13-vim3 -L -o - | sh
 
 # Docker configuration
 VOLUME ["/home/runbot/.local/share/Odoo/filestore", "/home/runbot/instance/extra_addons/odoo-extra/runbot/static", "/var/log/supervisor", "/var/lib/docker"]
