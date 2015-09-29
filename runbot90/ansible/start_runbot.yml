@@ -3,6 +3,43 @@
     - vars.yml
 
   tasks:
+
+    - name: Check logs folder permissions
+      file:
+        path: "{{ working_folder }}/logs"
+        state: directory
+        group: "{{ so_user }}"
+        owner: "{{ so_user }}"
+        recurse: yes
+      sudo: yes
+
+    - name: Check static folder permissions
+      file:
+        path: "{{ working_folder }}/static"
+        state: directory
+        group: "{{ so_user }}"
+        owner: "{{ so_user }}"
+        recurse: yes
+      sudo: yes
+
+    - name: Check docker folder permissions
+      file:
+        path: "{{ working_folder }}/docker"
+        state: directory
+        group: "{{ so_user }}"
+        owner: "{{ so_user }}"
+        recurse: yes
+      sudo: yes
+
+    - name: Check postgres folder permissions
+      file:
+        path: "{{ working_folder }}/psql_data"
+        state: directory
+        group: "{{ so_user }}"
+        owner: "{{ so_user }}"
+        recurse: yes
+      sudo: yes
+
     - name: Start a new postgres container
       docker:
         image: "{{ psql_image }}"
@@ -35,3 +72,4 @@
           - "{{ working_folder }}/docker:/var/lib/docker"
         links:
           - "{{ runbot_db }}:dbrunbot"
+
