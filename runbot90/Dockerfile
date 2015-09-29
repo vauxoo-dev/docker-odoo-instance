@@ -31,11 +31,14 @@ RUN pip install --upgrade git+https://github.com/Vauxoo/panama-dv.git \
 RUN curl -sSL https://get.docker.com/ | sh
 
 # Install ngrok to run fowardporting in developer environment
-RUN  curl https://dl.ngrok.com/ngrok_2.0.19_linux_amd64.zip -o /tmp/ngrok.zip \
+RUN curl https://dl.ngrok.com/ngrok_2.0.19_linux_amd64.zip -o /tmp/ngrok.zip \
     && unzip -o /tmp/ngrok.zip -d /usr/local/bin/ \
     && rm -rf /tmp/ngrok.zip
 
 USER runbot
+
+# Force home path to fix `supervisor start odoo` print os.expand('~') output: /root/
+ENV HOME /home/runbot
 
 RUN echo "source /home/runbot/.db_source" >> /home/runbot/.profile
 
